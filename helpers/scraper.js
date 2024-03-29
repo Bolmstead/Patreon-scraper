@@ -30,12 +30,17 @@ module.exports = async function scraper(
   currentPostTitles = []
 ) {
   try {
+    await page.reload();
     console.log("🏁🏁🏁🏁🏁🏁");
+    await page.waitForSelector('[data-tag="post-title"]', { visible: true });
+
     const titles = await page.$$('[data-tag="post-title"]');
+    console.log("🚀 ~ titles:", titles)
     const newPostTitles = [];
 
     for (const title of titles) {
       const innerTextTitle = await page.evaluate((el) => el.innerText, title);
+      console.log("🚀 ~ innerTextTitle:", innerTextTitle)
       newPostTitles.push(innerTextTitle);
     }
 
@@ -104,30 +109,23 @@ module.exports = async function scraper(
 
       // Crypto Gains Emails
       if (cryptoGainsEmails.length > 0 && scraperType === "CG" && !testing) {
-        setTimeout(async () => {
-          sendEmail(olms2074MGClient, `${title}Crypto Gains Posted!`, cryptoGainsEmails, process.env.OLMS2074_MAILGUN_EMAIL);
-        }, millisecondsBeforeEmailingOthers);
+         sendEmail(olms2074MGClient, `${title}Crypto Gains Posted!`, cryptoGainsEmails, process.env.OLMS2074_MAILGUN_EMAIL);
       }
 
       setTimeout(async () => {
-        await page.reload();
-        setTimeout(async () => {
           await scraper(page, scraperType, newPostTitles);
-        }, "7000");
-      }, "120000"); // 120000 = 2 mins
+      }, "60000"); // 60000 = 1 min
     } else {
       console.log("👌 He has not posted 👌");
 
-      await page.reload();
       setTimeout(async () => {
         await scraper(page, scraperType, currentPostTitles);
-      }, "5000");
+      }, "1000");
     }
   } catch (error) {
     console.log(error);
-    await page.reload();
     setTimeout(async () => {
       await scraper(page, scraperType, currentPostTitles);
-    }, "7000");
+    }, "1000");
   }
 };
