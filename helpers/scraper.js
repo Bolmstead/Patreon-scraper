@@ -12,16 +12,16 @@ const sendEmail = require("./sendEmail");
 const testing = false
 const playSound = true;
 const titlesToCreateAnAlertFor = ["alert", "Alert", "Pick", "pick", "PICK", "ALERT"]
-
 const millisecondsBeforeEmailingOthers = 5 * 1000;
 const myEmail = ["berkleyo@icloud.com"];
 const friendsAndFamilyEmails = [
   "tjob25@gmail.com",
-  "jerid.w.hammer@gmail.com",
+  "jerid.w.hammer@gmail.com", 
+  "alexsalazar6@gmail.com", 
+  "connorbullard8@icloud.com"
 ];
 const investAnswersEmails = ["johndo987987@gmail.com", "crypto.eagle.alert@gmail.com"];
 const cryptoGainsEmails = ["johndo987987@gmail.com", , "crypto.eagle.alert@gmail.com"];
-
 // -------------------
 
 module.exports = async function scraper(
@@ -70,7 +70,7 @@ module.exports = async function scraper(
       let title = ""
 
       for (let word of titlesToCreateAnAlertFor) {
-        if (newPostTitles[0].includes(word)) {
+        if (newPostTitles[0].includes(word) || testing) {
           title = "TRADE ALERT! - "
           if (playSound) {
             player.play("Siren.mp3", function (err) {
@@ -82,22 +82,23 @@ module.exports = async function scraper(
 
       const myEmailSubject = scraperType === "IA" ? "New IA Post!" : "New CG Post!"
 
-
       // My Email
       sendEmail(olms2074MGClient, `${title}${myEmailSubject}`, myEmail, process.env.OLMS2074_MAILGUN_EMAIL);
 
       // Friends and Family Emails
       if (
         friendsAndFamilyEmails.length > 0 &&
-        newPostTitles[0] === "IA Trade Alert" &&
         scraperType === "IA" && !testing
       ) {
-
-        sendEmail(
-          olms2074MGClient,
-          "Berk's Investment Group Posted!",
-          friendsAndFamilyEmails, process.env.OLMS2074_MAILGUN_EMAIL
-        );
+        for (let word of titlesToCreateAnAlertFor) {
+          if (newPostTitles[0].includes(word)) {
+            sendEmail(
+              olms2074MGClient,
+              "Berkley's Investment Group Posted!",
+              friendsAndFamilyEmails, process.env.OLMS2074_MAILGUN_EMAIL
+            );
+          }
+        }
       }
       
       // InvestAnswers Emails
@@ -120,7 +121,7 @@ module.exports = async function scraper(
 
       setTimeout(async () => {
         await scraper(page, scraperType, currentPostTitles);
-      }, "1000");
+      }, "500");
     }
   } catch (error) {
     console.log(error);
