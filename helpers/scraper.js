@@ -48,6 +48,7 @@ module.exports = async function scraper(
     const titles = await page.$$('[data-tag="post-title"]');
     console.log("🚀 ~ titles:", titles)
     const newPostTitles = [];
+    let isTradeAlert = false
 
     for (const title of titles) {
       const innerTextTitle = await page.evaluate((el) => el.innerText, title);
@@ -83,6 +84,7 @@ module.exports = async function scraper(
       for (let word of titlesToCreateAnAlertFor) {
         if (newPostTitles[0].includes(word) || testing) {
           title = "TRADE ALERT! - "
+          isTradeAlert = true
           if (playSound && serverType === "home") {
             player.play("Siren.mp3", function (err) {
               if (err) throw err;
@@ -100,29 +102,32 @@ module.exports = async function scraper(
       const myEmailSubject = scraperType === "IA" ? "New IA Post!" : "New CG Post!"
 
       // My Email
-      sendEmail(olms2074MGClient, `${title}${myEmailSubject}`, myEmail, process.env.OLMS2074_MAILGUN_EMAIL);
-
-      // Friends and Family Emails
-      if (
-        friendsAndFamilyEmails.length > 0 &&
-        scraperType === "IA" && !testing && sendEmailsToFriendsAndFamily
-      ) {
-        for (let word of titlesToCreateAnAlertFor) {
-          if (newPostTitles[0].includes(word)) {
-            sendEmail(
-              olms2074MGClient,
-              "Berkley's Investment Group Posted!",
-              friendsAndFamilyEmails, process.env.OLMS2074_MAILGUN_EMAIL
-            );
-          }
-        }
+      if (serverType === "home" || (serverType === "cloud" && isTradeAlert)) {
+        sendEmail(olms2074MGClient, `${title}${myEmailSubject}`, myEmail, process.env.OLMS2074_MAILGUN_EMAIL);
       }
+      // Friends and Family Emails
+      // if (
+      //   friendsAndFamilyEmails.length > 0 &&
+      //   scraperType === "IA" && !testing && sendEmailsToFriendsAndFamily
+      // ) {
+      //   for (let word of titlesToCreateAnAlertFor) {
+      //     if (newPostTitles[0].includes(word)) {
+      //       sendEmail(
+      //         olms2074MGClient,
+      //         "Berkley's Investment Group Posted!",
+      //         friendsAndFamilyEmails, process.env.OLMS2074_MAILGUN_EMAIL
+      //       );
+      //     }
+      //   }
+      // }
       
       // InvestAnswers Emails
       if (investAnswersEmails.length > 0 && scraperType === "IA") {
-        setTimeout(async () => {
-          sendEmail(olms2074MGClient, `${title}InvestAnswers Posted!`, investAnswersEmails, process.env.OLMS2074_MAILGUN_EMAIL);
-        }, millisecondsBeforeEmailingOthers);
+        if (serverType === "home" || (serverType === "cloud" && isTradeAlert)) {
+          setTimeout(async () => {
+            sendEmail(olms2074MGClient, `${title}InvestAnswers Posted!`, investAnswersEmails, process.env.OLMS2074_MAILGUN_EMAIL);
+          }, millisecondsBeforeEmailingOthers);
+        }
       }
 
       // // Crypto Gains Emails
