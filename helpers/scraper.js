@@ -9,10 +9,12 @@ const arraysContainSameItems = require("./arraysContainSameItems");
 const sendEmail = require("./sendEmail");
 
 // ----- config ------
-const testing = false
+const testing = process.env.TESTING
+const serverType = process.env.SERVER_TYPE
 const sendEmailsToFriendsAndFamily = false
 const playSound = true;
 const titlesToCreateAnAlertFor = ["alert", "Alert", "Pick", "pick", "PICK", "ALERT"]
+const millisecondsBeforeRerunningScraper = serverType === "cloud" ? 5000 : 1000;
 const millisecondsBeforeEmailingOthers = 10 * 1000;
 const myEmail = ["berkleyo@icloud.com"];
 const friendsAndFamilyEmails = [
@@ -24,11 +26,11 @@ const friendsAndFamilyEmails = [
 ];
 const investAnswersEmails = ["johndo987987@gmail.com"];
 // const cryptoGainsEmails = ["johndo987987@gmail.com"];
-const serverType = process.env.SERVER_TYPE
 
 
 console.log("**** CONFIG ****")
 console.log("Server Type: ", serverType)
+console.log("millisecondsBeforeRerunningScraper: ", millisecondsBeforeRerunningScraper)
 console.log("testing: ", testing)
 console.log("playSound: ", playSound)
 
@@ -75,14 +77,14 @@ module.exports = async function scraper(
 
     console.log("Latest Post: ", newPostTitles[0]);
 
-    if (!postsAreTheSame || testing) {
+    if (!postsAreTheSame || testing === "yes") {
       console.log("🎉🎉🎉 NEW POST BABY!!!! 🎉🎉🎉");
       console.log("💰💰💰 MAKE THAT DOUGH 💰💰💰");
 
       let title = ""
 
       for (let word of titlesToCreateAnAlertFor) {
-        if (newPostTitles[0].includes(word) || testing) {
+        if (newPostTitles[0].includes(word) || testing === "yes") {
           title = "TRADE ALERT! - "
           isTradeAlert = true
           if (playSound && serverType === "home") {
@@ -100,10 +102,12 @@ module.exports = async function scraper(
       }
 
       const myEmailSubject = scraperType === "IA" ? "New IA Post!" : "New CG Post!"
+      const testingText = testing === "yes" ? " (TEST)" : ""
+
 
       // My Email
       if (serverType === "home" || (serverType === "cloud" && isTradeAlert)) {
-        sendEmail(olms2074MGClient, `${title}${myEmailSubject}`, myEmail, process.env.OLMS2074_MAILGUN_EMAIL);
+        sendEmail(olms2074MGClient, `${title}${myEmailSubject}${testingText}`, myEmail, process.env.OLMS2074_MAILGUN_EMAIL);
       }
       // Friends and Family Emails
       // if (
@@ -123,9 +127,9 @@ module.exports = async function scraper(
       
       // InvestAnswers Emails
       if (investAnswersEmails.length > 0 && scraperType === "IA") {
-        if (serverType === "home" || (serverType === "cloud" && isTradeAlert)) {
+        if (serverType === "home" || (serverType === "cloud" && isTradeAlert) || testing === "yes") {
           setTimeout(async () => {
-            sendEmail(olms2074MGClient, `${title}InvestAnswers Posted!`, investAnswersEmails, process.env.OLMS2074_MAILGUN_EMAIL);
+            sendEmail(olms2074MGClient, `${title}InvestAnswers Posted!${testingText}`, investAnswersEmails, process.env.OLMS2074_MAILGUN_EMAIL);
           }, millisecondsBeforeEmailingOthers);
         }
       }
@@ -143,12 +147,12 @@ module.exports = async function scraper(
 
       setTimeout(async () => {
         await scraper(page, scraperType, currentPostTitles);
-      }, "500");
+      }, millisecondsBeforeRerunningScraper);
     }
   } catch (error) {
     console.log(error);
     setTimeout(async () => {
       await scraper(page, scraperType, currentPostTitles);
-    }, "1000");
+    }, millisecondsBeforeRerunningScraper);
   }
 };
