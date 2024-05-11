@@ -2,7 +2,7 @@ require("dotenv").config();
 
 var player = require("play-sound")((opts = {}));
 const olms2074MGClient = require("../MailGunClients/olms2074MGClient")
-const boMGClient = require("../MailGunClients/boMGClient")
+// const boMGClient = require("../MailGunClients/boMGClient")
 
 
 const arraysContainSameItems = require("./arraysContainSameItems");
@@ -23,8 +23,9 @@ const friendsAndFamilyEmails = [
   "katie.austin29@gmail.com"
 ];
 const investAnswersEmails = ["johndo987987@gmail.com"];
-const cryptoGainsEmails = ["johndo987987@gmail.com"];
+// const cryptoGainsEmails = ["johndo987987@gmail.com"];
 const serverType = process.env.SERVER_TYPE
+
 
 console.log("**** CONFIG ****")
 console.log("Server Type: ", serverType)
@@ -82,13 +83,13 @@ module.exports = async function scraper(
       for (let word of titlesToCreateAnAlertFor) {
         if (newPostTitles[0].includes(word) || testing) {
           title = "TRADE ALERT! - "
-          if (playSound) {
+          if (playSound && serverType === "home") {
             player.play("Siren.mp3", function (err) {
               if (err) throw err;
             });
           }
         } else {
-          if (playSound) {
+          if (playSound && serverType === "home") {
             player.play("Success.mp3", function (err) {
               if (err) throw err;
             });
@@ -124,10 +125,10 @@ module.exports = async function scraper(
         }, millisecondsBeforeEmailingOthers);
       }
 
-      // Crypto Gains Emails
-      if (cryptoGainsEmails.length > 0 && scraperType === "CG" && !testing) {
-         sendEmail(olms2074MGClient, `${title}Crypto Gains Posted!`, cryptoGainsEmails, process.env.OLMS2074_MAILGUN_EMAIL);
-      }
+      // // Crypto Gains Emails
+      // if (cryptoGainsEmails.length > 0 && scraperType === "CG" && !testing) {
+      //    sendEmail(olms2074MGClient, `${title}Crypto Gains Posted!`, cryptoGainsEmails, process.env.OLMS2074_MAILGUN_EMAIL);
+      // }
 
       setTimeout(async () => {
           await scraper(page, scraperType, newPostTitles);
