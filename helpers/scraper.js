@@ -24,6 +24,14 @@ const friendsAndFamilyEmails = [
 ];
 const investAnswersEmails = ["johndo987987@gmail.com"];
 const cryptoGainsEmails = ["johndo987987@gmail.com"];
+const serverType = process.env.SERVER_TYPE
+
+console.log("**** CONFIG ****")
+console.log("Server Type: ", serverType)
+console.log("testing: ", testing)
+console.log("playSound: ", playSound)
+
+
 // -------------------
 
 module.exports = async function scraper(
