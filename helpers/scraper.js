@@ -10,18 +10,20 @@ const sendEmail = require("./sendEmail");
 
 // ----- config ------
 const testing = false
+const sendEmailsToFriendsAndFamily = false
 const playSound = true;
 const titlesToCreateAnAlertFor = ["alert", "Alert", "Pick", "pick", "PICK", "ALERT"]
-const millisecondsBeforeEmailingOthers = 5 * 1000;
+const millisecondsBeforeEmailingOthers = 10 * 1000;
 const myEmail = ["berkleyo@icloud.com"];
 const friendsAndFamilyEmails = [
   "tjob25@gmail.com",
   "jerid.w.hammer@gmail.com", 
   "alexsalazar6@gmail.com", 
-  "connorbullard8@icloud.com"
+  "connorbullard8@icloud.com",
+  "katie.austin29@gmail.com"
 ];
-const investAnswersEmails = ["johndo987987@gmail.com", "crypto.eagle.alert@gmail.com"];
-const cryptoGainsEmails = ["johndo987987@gmail.com", , "crypto.eagle.alert@gmail.com"];
+const investAnswersEmails = ["johndo987987@gmail.com"];
+const cryptoGainsEmails = ["johndo987987@gmail.com"];
 // -------------------
 
 module.exports = async function scraper(
@@ -77,6 +79,12 @@ module.exports = async function scraper(
               if (err) throw err;
             });
           }
+        } else {
+          if (playSound) {
+            player.play("Success.mp3", function (err) {
+              if (err) throw err;
+            });
+          }
         }
       }
 
@@ -88,7 +96,7 @@ module.exports = async function scraper(
       // Friends and Family Emails
       if (
         friendsAndFamilyEmails.length > 0 &&
-        scraperType === "IA" && !testing
+        scraperType === "IA" && !testing && sendEmailsToFriendsAndFamily
       ) {
         for (let word of titlesToCreateAnAlertFor) {
           if (newPostTitles[0].includes(word)) {
@@ -102,7 +110,7 @@ module.exports = async function scraper(
       }
       
       // InvestAnswers Emails
-      if (investAnswersEmails.length > 0 && scraperType === "IA" && !testing) {
+      if (investAnswersEmails.length > 0 && scraperType === "IA") {
         setTimeout(async () => {
           sendEmail(olms2074MGClient, `${title}InvestAnswers Posted!`, investAnswersEmails, process.env.OLMS2074_MAILGUN_EMAIL);
         }, millisecondsBeforeEmailingOthers);
