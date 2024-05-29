@@ -37,7 +37,6 @@ console.log("playSound: ", playSound)
 
 module.exports = async function scraper(
   page,
-  scraperType = "IA",
   currentPostTitles = []
 ) {
   try {
@@ -135,19 +134,19 @@ module.exports = async function scraper(
       // }
 
       setTimeout(async () => {
-          await scraper(page, scraperType, newPostTitles);
+          await scraper(page, newPostTitles);
       }, "60000"); // 60000 = 1 min
     } else {
       console.log("👌 He has not posted 👌");
 
       setTimeout(async () => {
-        await scraper(page, scraperType, currentPostTitles);
+        await scraper(page, currentPostTitles);
       }, millisecondsBeforeRerunningScraper);
     }
   } catch (error) {
     console.log(error);
     setTimeout(async () => {
-      await scraper(page, scraperType, currentPostTitles);
+      await scraper(page, currentPostTitles);
     }, millisecondsBeforeRerunningScraper);
   }
 };
