@@ -1,4 +1,4 @@
-const scraper = require("./helpers/scraper");
+const scraper = require("./helpers/CGscraperHelper");
 const puppeteer = require("puppeteer-extra");
 
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
@@ -24,7 +24,7 @@ async function logIntoPatreon(email, password) {
     await page.type('input[type="password"]', password);
     await page.click("[type=submit]");
     setTimeout(async () => {
-      await scraper(page, "CG", []);
+      await scraper(page, []);
     }, "5000");
   }, "2000");
 }
