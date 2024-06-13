@@ -1,57 +1,67 @@
 require("dotenv").config();
-
+const checkIfItsGameTime = require("./checkIfItsGameTime");
 var player = require("play-sound")((opts = {}));
-const olms2074MGClient = require("../MailGunClients/olms2074MGClient")
+const olms2074MGClient = require("../MailGunClients/olms2074MGClient");
 // const boMGClient = require("../MailGunClients/boMGClient")
-
 
 const arraysContainSameItems = require("./arraysContainSameItems");
 const sendEmail = require("./sendEmail");
 
 // ----- config ------
-const testing = false
-const sendEmailsToFriendsAndFamily = false
+const testing = false;
+const sendEmailsToFriendsAndFamily = false;
 const playSound = true;
-const titlesToCreateAnAlertFor = ["alert", "Alert", "Pick", "pick", "PICK", "ALERT"]
-const millisecondsBeforeRerunningScraper = 1000;
+const titlesToCreateAnAlertFor = [
+  "alert",
+  "Alert",
+  "Pick",
+  "pick",
+  "PICK",
+  "ALERT",
+];
+const millisecondsBeforeRerunningScraper = 2000;
 const millisecondsBeforeEmailingOthers = 10 * 1000;
 const myEmail = ["berkleyo@icloud.com"];
 const friendsAndFamilyEmails = [
   "tjob25@gmail.com",
-  "jerid.w.hammer@gmail.com", 
-  "alexsalazar6@gmail.com", 
+  "jerid.w.hammer@gmail.com",
+  "alexsalazar6@gmail.com",
   "connorbullard8@icloud.com",
-  "katie.austin29@gmail.com"
+  "katie.austin29@gmail.com",
 ];
 const investAnswersEmails = ["johndo987987@gmail.com"];
 // const cryptoGainsEmails = ["johndo987987@gmail.com"];
 
-
-console.log("**** CONFIG ****")
-console.log("millisecondsBeforeRerunningScraper: ", millisecondsBeforeRerunningScraper)
-console.log("testing: ", testing)
-console.log("playSound: ", playSound)
-
+console.log("**** CONFIG ****");
+console.log(
+  "millisecondsBeforeRerunningScraper: ",
+  millisecondsBeforeRerunningScraper
+);
+console.log("testing: ", testing);
+console.log("playSound: ", playSound);
 
 // -------------------
 
-module.exports = async function scraper(
-  page,
-  currentPostTitles = []
-) {
+module.exports = async function scraper(page, currentPostTitles = []) {
   try {
+    const itsGameTime = checkIfItsGameTime();
+    if (!itsGameTime) {
+      setTimeout(async () => {
+        await scraper(page, currentPostTitles);
+      }, 60 * 1000);
+    }
     await page.reload();
     console.log("🏁🏁🏁🏁🏁🏁");
     await page.waitForSelector('[data-tag="post-title"]', { visible: true });
 
     const titles = await page.$$('[data-tag="post-title"]');
-    console.log("🚀 ~ titles:", titles)
+    console.log("🚀 ~ titles:", titles);
     const newPostTitles = [];
-    let isTradeAlert = false
+    let isTradeAlert = false;
 
     for (const title of titles) {
       const innerTextTitle = await page.evaluate((el) => el.innerText, title);
-      console.log("🚀 ~ innerTextTitle:", innerTextTitle)
+      console.log("🚀 ~ innerTextTitle:", innerTextTitle);
       newPostTitles.push(innerTextTitle);
     }
 
@@ -78,12 +88,12 @@ module.exports = async function scraper(
       console.log("🎉🎉🎉 NEW POST BABY!!!! 🎉🎉🎉");
       console.log("💰💰💰 MAKE THAT DOUGH 💰💰💰");
 
-      let title = ""
+      let title = "";
 
       for (let word of titlesToCreateAnAlertFor) {
         if (newPostTitles[0].includes(word) || testing) {
-          title = "TRADE ALERT! - "
-          isTradeAlert = true
+          title = "TRADE ALERT! - ";
+          isTradeAlert = true;
           if (playSound) {
             player.play("Siren.mp3", function (err) {
               if (err) throw err;
@@ -98,13 +108,17 @@ module.exports = async function scraper(
         }
       }
 
-      const myEmailSubject = "New IA Post!"
-      const testingText = testing ? " (TEST)" : ""
-
+      const myEmailSubject = "New IA Post!";
+      const testingText = testing ? " (TEST)" : "";
 
       // My Email
-        sendEmail(olms2074MGClient, `${title}${myEmailSubject}${testingText}`, myEmail, process.env.OLMS2074_MAILGUN_EMAIL);
-      
+      sendEmail(
+        olms2074MGClient,
+        `${title}${myEmailSubject}${testingText}`,
+        myEmail,
+        process.env.OLMS2074_MAILGUN_EMAIL
+      );
+
       // Friends and Family Emails
       // if (
       //   friendsAndFamilyEmails.length > 0 &&
@@ -120,12 +134,17 @@ module.exports = async function scraper(
       //     }
       //   }
       // }
-      
+
       // InvestAnswers Emails
       if (investAnswersEmails.length > 0) {
-          setTimeout(async () => {
-            sendEmail(olms2074MGClient, `${title}InvestAnswers Posted!${testingText}`, investAnswersEmails, process.env.OLMS2074_MAILGUN_EMAIL);
-          }, millisecondsBeforeEmailingOthers);
+        setTimeout(async () => {
+          sendEmail(
+            olms2074MGClient,
+            `${title}InvestAnswers Posted!${testingText}`,
+            investAnswersEmails,
+            process.env.OLMS2074_MAILGUN_EMAIL
+          );
+        }, millisecondsBeforeEmailingOthers);
       }
 
       // // Crypto Gains Emails
@@ -134,7 +153,7 @@ module.exports = async function scraper(
       // }
 
       setTimeout(async () => {
-          await scraper(page, newPostTitles);
+        await scraper(page, newPostTitles);
       }, "60000"); // 60000 = 1 min
     } else {
       console.log("👌 He has not posted 👌");
