@@ -9,12 +9,6 @@ require("dotenv").config();
 logIntoPatreon("olms2074@gmail.com", process.env.PATREON_PASSWORD); // InvestAnswers
 
 async function logIntoPatreon(email, password) {
-  const itsGameTime = checkIfItsGameTime();
-  if (!itsGameTime) {
-    setTimeout(async () => {
-      logIntoPatreon("olms2074@gmail.com", process.env.PATREON_PASSWORD);
-    }, 60 * 1000);
-  }
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: false,
