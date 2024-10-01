@@ -17,15 +17,7 @@ async function logIntoPatreon(email, password) {
 
   await page.goto(`https://www.patreon.com/login`, { waitUntil: "load" });
 
-  await page.type('input[name="email"]', email);
-
-  await page.click("[type=submit]");
-
   setTimeout(async () => {
-    await page.type('input[type="password"]', password);
-    await page.click("[type=submit]");
-    setTimeout(async () => {
-      await scraper(page);
-    }, "5000");
-  }, "2000");
+    await scraper(page);
+  }, "45000");
 }

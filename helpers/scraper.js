@@ -136,16 +136,16 @@ module.exports = async function scraper(page, currentPostTitles = []) {
         // }
 
         // InvestAnswers Emails
-        if (investAnswersEmails.length > 0) {
-          setTimeout(async () => {
-            sendEmail(
-              olms2074MGClient,
-              `${title}InvestAnswers Posted!${testingText}`,
-              investAnswersEmails,
-              process.env.OLMS2074_MAILGUN_EMAIL
-            );
-          }, millisecondsBeforeEmailingOthers);
-        }
+        // if (investAnswersEmails.length > 0) {
+        //   setTimeout(async () => {
+        //     sendEmail(
+        //       olms2074MGClient,
+        //       `${title}InvestAnswers Posted!${testingText}`,
+        //       investAnswersEmails,
+        //       process.env.OLMS2074_MAILGUN_EMAIL
+        //     );
+        //   }, millisecondsBeforeEmailingOthers);
+        // }
 
         // // Crypto Gains Emails
         // if (cryptoGainsEmails.length > 0 && scraperType === "CG" && !testing) {
