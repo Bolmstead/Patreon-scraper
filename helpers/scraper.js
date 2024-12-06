@@ -19,7 +19,7 @@ const titlesToCreateAnAlertFor = [
   "PICK",
   "ALERT",
 ];
-const millisecondsBeforeRerunningScraper = 2000;
+const millisecondsBeforeRerunningScraper = 4 * 1000;
 const millisecondsBeforeEmailingOthers = 10 * 1000;
 const myEmail = ["berkleyo@icloud.com"];
 const friendsAndFamilyEmails = [
